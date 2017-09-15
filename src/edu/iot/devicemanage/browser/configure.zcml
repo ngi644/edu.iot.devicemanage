@@ -1,0 +1,31 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="edu.iot.devicemanage">
+
+  <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+  <include package="z3c.jbot" file="meta.zcml" />
+  <browser:jbot
+      directory="overrides"
+      layer="edu.iot.devicemanage.interfaces.IEduIotDevicemanageLayer"
+      />
+
+  <!-- Publish static files -->
+  <plone:static
+      name="edu.iot.devicemanage"
+      type="plone"
+      directory="static"
+      />
+
+  <browser:page
+    for="edu.iot.devicemanage.interfaces.IDevice"
+    name="view"
+    class=".view.DeviceView"
+    permission="zope2.View"
+    template="templates/device_view.pt"
+    />
+
+
+
+</configure>
