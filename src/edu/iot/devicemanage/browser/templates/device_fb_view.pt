@@ -57,9 +57,7 @@
         define = undefined;
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min.js"></script>
-
-    <script src="https://cdn.mlkcca.com/v0.6.0/milkcocoa.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/5.5.2/firebase.js"></script>
 
 </metal:scripts>
 
@@ -75,7 +73,20 @@
 
     <div tal:replace="structure view/get_param"><!----></div>
 
+    <script>
+        // Initialize Firebase
+        var config = {
+          apiKey: apiKey,
+          authDomain: authDomain,
+          databaseURL: databaseURL,
+          storageBucket: storageBucket,
+          messagingSenderId: messagingSenderId
+        };
+    </script>
+
     <script type="text/javascript">
+
+        firebase.initializeApp(config);
 
         let container = document.getElementById('visualization');
 
@@ -129,7 +140,7 @@
             }
         });
 
-        //let dataset = new vis.DataSet(items);
+
         let date = new Date();
         let options = {
             dataAxis: {
@@ -145,34 +156,21 @@
         };
         let graph2d = new vis.Graph2d(container, dataset, groups, options);
 
-        let mlkDs = MilkCocoa.connectWithApiKey(app_id, app_key, app_pass);
-
-        let data_store_path = app_ds + '/' + device_id;
-
-        mlkDs.dataStore(data_store_path).stream().size(150).sort('desc').next(function (err, data) {
-            data.forEach(function (d, i) {
-                //{"temp":31.25,"envtemp":25.96,"pressure":1006.45532,"humid":62.91309}
-                addItem(d.timestamp, d.value.temp, 0);
-                addItem(d.timestamp, d.value.pressure, 1);
-                addItem(d.timestamp, d.value.humid, 2);
-                addItem(d.timestamp, d.value.envtemp, 3);
-            });
+        var ref = firebase.database().ref('Device').child(device_id);
+        ref.limitToLast(10).on('child_added', function(snapshot) {
+            var newData = snapshot.val();
+            addItem(newData.Timestamp, newData.temp, 0);
+            addItem(newData.Timestamp, newData.temp.pressure, 1);
+            addItem(newData.Timestamp, newData.temp.humid, 2);
+            addItem(newData.Timestamp, newData.temp.envtemp, 3);
+            let now = new Date();
+            graph2d.setWindow(now.setMinutes(now.getMinutes() - 20), now.setMinutes(now.getMinutes() + 22), {animation: false});
         });
 
         function addItem(timestamp, value, g) {
             itm = { x: new Date(timestamp).toLocaleString(), y: value, group: g };
             dataset.add(itm);
         }
-
-        mlkDs.dataStore(data_store_path).on('push', function(pushed) {
-            //console.log('pushed!', pushed.id, pushed.value);
-            addItem(pushed.timestamp, pushed.value.temp, 0);
-            addItem(pushed.timestamp, pushed.value.pressure, 1);
-            addItem(pushed.timestamp, pushed.value.humid, 2);
-            addItem(pushed.timestamp, pushed.value.envtemp, 3);
-            let now = new Date();
-            graph2d.setWindow(now.setMinutes(now.getMinutes() - 20), now.setMinutes(now.getMinutes() + 22), {animation: false});
-        });
 
 
     </script>
