@@ -157,12 +157,14 @@
         let graph2d = new vis.Graph2d(container, dataset, groups, options);
 
         var ref = firebase.database().ref('Device').child(device_id);
-        ref.limitToLast(10).on('child_added', function(snapshot) {
+        ref.limitToLast(100).on('child_added', function(snapshot) {
             var newData = snapshot.val();
-            addItem(newData.Timestamp, newData.temp, 0);
-            addItem(newData.Timestamp, newData.temp.pressure, 1);
-            addItem(newData.Timestamp, newData.temp.humid, 2);
-            addItem(newData.Timestamp, newData.temp.envtemp, 3);
+            var newtime = newData.Timestamp;
+            newtime = newtime.replace(/-/g, '/');
+            addItem(newtime, newData.temp, 0);
+            addItem(newtime, newData.temp.pressure, 1);
+            addItem(newtime, newData.temp.humid, 2);
+            addItem(newtime, newData.temp.envtemp, 3);
             let now = new Date();
             graph2d.setWindow(now.setMinutes(now.getMinutes() - 20), now.setMinutes(now.getMinutes() + 22), {animation: false});
         });
