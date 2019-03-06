@@ -14,4 +14,5 @@ class Device(Item):
         parent = self.__parent__
         params = parent.get_params()
         params['device_id'] = self.device_id
+        params['device_name'] = self.title
         return params
